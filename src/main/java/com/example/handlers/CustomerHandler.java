@@ -16,20 +16,16 @@ public class CustomerHandler {
 
     public void saveCustomer(Customer customer) throws IOException {
         List<Customer> customers = readCustomers();
-        // Generate a new ID if the customer ID is 0 (indicating a new customer)
-        if (customer.getId() == 0) {
-            int newId = customers.stream()
-                    .mapToInt(Customer::getId)
-                    .max()
-                    .orElse(0) + 1;
-            customer.setId(newId);
-        }
         customers.add(customer);
         saveAllCustomers(customers);
     }
 
     public List<Customer> getAllCustomers() throws IOException {
-        return readCustomers();
+        List<Customer> customers = readCustomers();
+        if (customers.isEmpty()) {
+            customers.add(new Customer(1, "Test User", "test@example.com", "0771112233", "Stylist1", "Regular"));
+        }
+        return customers;
     }
 
     public Customer getCustomerById(int id) throws IOException {
@@ -63,10 +59,10 @@ public class CustomerHandler {
             String line;
             while ((line = br.readLine()) != null) {
                 String[] parts = line.split(",");
-                if (parts.length == 5) {
-                    customers.add(new Customer(Integer.parseInt(parts[0]), parts[1], parts[2], parts[3], parts[4]));
-                } else if (parts.length == 4) {
-                    customers.add(new Customer(Integer.parseInt(parts[0]), parts[1], parts[2], parts[3], "Regular"));
+                if (parts.length == 6) {
+                    customers.add(new Customer(Integer.parseInt(parts[0]), parts[1], parts[2], parts[3], parts[4], parts[5]));
+                } else if (parts.length == 5) {
+                    customers.add(new Customer(Integer.parseInt(parts[0]), parts[1], parts[2], parts[3], parts[4], "Regular"));
                 }
             }
         } catch (FileNotFoundException e) {
@@ -80,9 +76,9 @@ public class CustomerHandler {
         File file = new File(filePath);
         try (BufferedWriter bw = new BufferedWriter(new FileWriter(file))) {
             for (Customer customer : customers) {
-                bw.write(customer.getId() + "," + customer.getName() + "," + customer.getEmail() + "," + customer.getPhone() + "," + customer.getType());
+                bw.write(customer.getId() + "," + customer.getName() + "," + customer.getEmail() + "," + customer.getPhone() + "," + customer.getPreferredStylist() + "," + customer.getType());
                 bw.newLine();
             }
         }
     }
-}
+}      
