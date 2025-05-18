@@ -74,7 +74,7 @@ public class FeedbackServlet extends HttpServlet {
                 Feedback feedback = new Feedback(id, customerName, comments, rating);
                 feedbackHandler.saveFeedback(feedback);
                 System.out.println("FeedbackServlet: Successfully saved feedback with ID " + id + " at " + request.getRequestURI());
-                response.sendRedirect(request.getContextPath() + "/feedback?action=display");
+                response.sendRedirect(request.getContextPath() + "/mainIndex.jsp");
             } catch (NumberFormatException e) {
                 System.out.println("FeedbackServlet: Invalid input format: " + e.getMessage() + " at " + request.getRequestURI());
                 request.setAttribute("error", "Invalid input format: " + e.getMessage());
@@ -97,7 +97,7 @@ public class FeedbackServlet extends HttpServlet {
                 Feedback feedback = new Feedback(id, customerName, comments, rating);
                 feedbackHandler.updateFeedback(feedback);
                 System.out.println("FeedbackServlet: Successfully updated feedback with ID " + id + " at " + request.getRequestURI());
-                response.sendRedirect(request.getContextPath() + "/feedback?action=display"); // Changed to redirect to display.jsp
+                response.sendRedirect(request.getContextPath() + "/feedback?action=display");
             } catch (NumberFormatException e) {
                 System.out.println("FeedbackServlet: Invalid input format during update: " + e.getMessage() + " at " + request.getRequestURI());
                 request.setAttribute("error", "Invalid input format.");
