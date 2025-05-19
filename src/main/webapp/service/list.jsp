@@ -1,4 +1,11 @@
-<script type="text/javascript">
+<%@ page contentType="text/html;charset=UTF-8" language="java" %>
+<%@ page import="java.util.List, com.example.models.Service" %>
+<html>
+<head>
+    <title>Services</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+    <script type="text/javascript">
         var gk_isXlsx = false;
         var gk_xlsxFileLookup = {};
         var gk_fileData = {};
@@ -27,7 +34,7 @@
                 }
 
                 // Convert filtered JSON back to CSV
-                var csv = XLSX.utils.aoa_to_sheet(filteredData.slice(headerRowIndex)); // Create a new sheet from filtered array of arrays
+                var csv = XLSX.utils.aoa_to_sheet(filteredData.slice(headerRowIndex));
                 csv = XLSX.utils.sheet_to_csv(csv, { header: 1 });
                 return csv;
             } catch (e) {
@@ -37,94 +44,61 @@
         }
         return gk_fileData[filename] || "";
         }
-        </script><%@ page contentType="text/html;charset=UTF-8" language="java" %>
-<%@ page import="java.util.List, com.example.models.Service" %>
-<html>
-<head>
-    <title>Service List</title>
-    <script src="https://cdn.tailwindcss.com"></script>
+    </script>
     <style>
         body {
-            background-image: url('${pageContext.request.contextPath}/images/salon-bg3.jpg');
+            background-image: url('${pageContext.request.contextPath}/images/salon-bg2.jpg');
             background-size: cover;
             background-position: center;
-        }
-        .no-wrap {
-            white-space: nowrap;
-        }
-        .table-container {
-            max-height: 400px;
-            overflow-y: auto;
-            display: block;
-        }
-        table {
-            width: 100%;
-        }
-        thead {
-            position: sticky;
-            top: 0;
-            background-color: #e5e7eb;
-            z-index: 1;
-        }
-        .description-column {
-            width: 50%; /* Increased to 50% to utilize the wider white box */
         }
     </style>
 </head>
 <body class="bg-gray-100 min-h-screen flex items-center justify-center">
-<div class="bg-white bg-opacity-80 p-6 rounded-lg shadow-lg w-full max-w-6xl"> <!-- Increased max-width to 6xl -->
-    <h1 class="text-2xl font-bold mb-4">Services</h1>
+<div class="bg-white bg-opacity-80 p-6 rounded-lg shadow-lg max-w-4xl w-full">
+    <h1 class="text-2xl font-bold mb-4 text-gray-800">Services</h1>
     <% if (request.getAttribute("error") != null) { %>
-    <p class="text-red-500 mb-4"><%= request.getAttribute("error") %></p>
+        <p class="text-red-500 mb-4"><%= request.getAttribute("error") %></p>
     <% } %>
-    <div class="table-container">
-        <table class="w-full border-collapse border">
+    <div class="overflow-x-auto">
+        <table class="w-full border-collapse">
             <thead>
-            <tr class="bg-gray-200">
-                <th class="border p-2">ID</th>
-                <th class="border p-2">Name</th>
-                <th class="border p-2">Duration</th>
-                <th class="border p-2">Price (LKR)</th>
-                <th class="border p-2 description-column">Description</th>
-                <th class="border p-2">Type</th>
-                <th class="border p-2">Actions</th>
-            </tr>
+                <tr class="bg-gray-200">
+                    <th class="border p-2 text-left text-gray-700">ID</th>
+                    <th class="border p-2 text-left text-gray-700">Name</th>
+                    <th class="border p-2 text-left text-gray-700">Duration</th>
+                    <th class="border p-2 text-left text-gray-700">Price (LKR)</th>
+                    <th class="border p-2 text-left text-gray-700">Description</th>
+                    <th class="border p-2 text-left text-gray-700">Type</th>
+                    <th class="border p-2 text-left text-gray-700">Actions</th>
+                </tr>
             </thead>
             <tbody>
-            <%
-                List<Service> services = (List<Service>) request.getAttribute("services");
-                if (services != null && !services.isEmpty()) {
-                    for (Service service : services) {
-            %>
-            <tr>
-                <td class="border p-2 no-wrap align-middle"><%= service.getId() %></td>
-                <td class="border p-2 no-wrap align-middle"><%= service.getName() %></td>
-                <td class="border p-2 no-wrap align-middle"><%= service.getDuration() %> mins</td>
-                <td class="border p-2 no-wrap align-middle"><%= String.format("%.2f", service.getPrice()) %></td>
-                <td class="border p-2 description-column"><%= service.getDescription() != null ? service.getDescription() : "" %></td>
-                <td class="border p-2 no-wrap align-middle"><%= service.getType() %></td>
-                <td class="border p-2 no-wrap align-middle">
-                    <div class="flex justify-center space-x-2">
-                        <a href="service?action=edit&id=<%= service.getId() %>" class="text-blue-500 bg-blue-100 px-2 py-1 rounded hover:bg-blue-200">Edit</a>
-                        <a href="service?action=delete&id=<%= service.getId() %>" onclick="return confirm('Are you sure you want to delete this service?')" class="text-red-500 bg-red-100 px-2 py-1 rounded hover:bg-red-200">Delete</a>
-                    </div>
-                </td>
-            </tr>
-            <%
-                }
-            } else {
-            %>
-            <tr>
-                <td colspan="7" class="border p-2 text-center">No services found.</td>
-            </tr>
-            <%
-                }
-            %>
+                <% List<Service> services = (List<Service>) request.getAttribute("services");
+                   if (services != null && !services.isEmpty()) {
+                       for (Service service : services) { %>
+                    <tr class="hover:bg-gray-50">
+                        <td class="border p-2"><%= service.getId() %></td>
+                        <td class="border p-2"><%= service.getName() %></td>
+                        <td class="border p-2"><%= service.getDuration() %> mins</td>
+                        <td class="border p-2"><%= String.format("%.2f", service.getPrice()) %></td>
+                        <td class="border p-2"><%= service.getDescription() != null ? service.getDescription() : "" %></td>
+                        <td class="border p-2"><%= service.getType() %></td>
+                        <td class="border p-2 flex space-x-2">
+                            <a href="${pageContext.request.contextPath}/service?action=edit&id=<%= service.getId() %>" class="bg-green-500 text-white px-2 py-1 rounded hover:bg-green-600">Edit</a>
+                            <a href="${pageContext.request.contextPath}/service?action=delete&id=<%= service.getId() %>" class="bg-red-500 text-white px-2 py-1 rounded hover:bg-red-600" onclick="return confirm('Are you sure you want to delete this service?')">Delete</a>
+                        </td>
+                    </tr>
+                <%     }
+                   } else { %>
+                    <tr>
+                        <td colspan="7" class="border p-2 text-center text-gray-600">No services found.</td>
+                    </tr>
+                <% } %>
             </tbody>
         </table>
     </div>
-    <div class="mt-4 space-x-4">
-        <a href="service?action=add" class="bg-purple-500 text-white px-4 py-2 rounded hover:bg-purple-600">Add New Service</a>
+    <div class="mt-4 flex space-x-4">
+        <a href="${pageContext.request.contextPath}/service?action=add" class="bg-purple-500 text-white px-4 py-2 rounded hover:bg-purple-600">Add New Service</a>
         <a href="${pageContext.request.contextPath}/index.jsp" class="bg-gray-500 text-white px-4 py-2 rounded hover:bg-gray-600">Back to Home</a>
     </div>
 </div>
