@@ -57,7 +57,6 @@ public class ServiceServlet extends HttpServlet {
         String action = request.getParameter("action");
         if ("add".equals(action)) {
             try {
-                String id = request.getParameter("id");
                 String name = request.getParameter("name");
                 String duration = request.getParameter("duration");
                 double price = Double.parseDouble(request.getParameter("price"));
@@ -65,11 +64,12 @@ public class ServiceServlet extends HttpServlet {
                 String type = request.getParameter("type");
 
                 // Basic validation
-                if (id == null || name == null || duration == null || type == null || id.isEmpty() || name.isEmpty() || duration.isEmpty() || type.isEmpty()) {
+                if (name == null || duration == null || type == null || name.isEmpty() || duration.isEmpty() || type.isEmpty()) {
                     throw new IllegalArgumentException("All required fields must be filled.");
                 }
 
-                Service service = new Service(id, name, duration, price, description, type);
+                // ID will be auto-generated in ServiceHandler
+                Service service = new Service("", name, duration, price, description, type);
                 serviceHandler.saveService(service);
                 response.sendRedirect(request.getContextPath() + "/service?action=list");
             } catch (NumberFormatException e) {
@@ -85,19 +85,19 @@ public class ServiceServlet extends HttpServlet {
         } else if ("update".equals(action)) {
             try {
                 String originalId = request.getParameter("originalId");
-                String id = request.getParameter("id");
                 String name = request.getParameter("name");
                 String duration = request.getParameter("duration");
                 double price = Double.parseDouble(request.getParameter("price"));
                 String description = request.getParameter("description");
                 String type = request.getParameter("type");
-                Service service = new Service(id, name, duration, price, description, type);
+                // Use originalId as the ID to maintain consistency
+                Service service = new Service(originalId, name, duration, price, description, type);
                 serviceHandler.updateService(originalId, service);
                 response.sendRedirect(request.getContextPath() + "/service?action=list");
             } catch (Exception e) {
                 request.setAttribute("error", "Error updating service: " + e.getMessage());
                 request.setAttribute("service", new Service(
-                    request.getParameter("id"),
+                    request.getParameter("originalId"),
                     request.getParameter("name"),
                     request.getParameter("duration"),
                     Double.parseDouble(request.getParameter("price")),
