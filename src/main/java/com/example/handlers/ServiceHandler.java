@@ -4,24 +4,45 @@ import com.example.models.Service;
 import jakarta.servlet.ServletContext;
 import java.io.*;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 
 public class ServiceHandler {
     private String tempFilePath;
+    private String counterFilePath;
 
     public ServiceHandler(ServletContext context) {
         Object tempDir = context.getAttribute("javax.servlet.context.tempdir");
-        this.tempFilePath = (tempDir != null ? tempDir.toString() : System.getProperty("java.io.tmpdir")) + File.separator + "services.txt";
+        String tempDirPath = (tempDir != null ? tempDir.toString() : System.getProperty("java.io.tmpdir")) + File.separator;
+        this.tempFilePath = tempDirPath + "services.txt";
+        this.counterFilePath = tempDirPath + "id_counter.txt";
     }
 
     public void saveService(Service service) throws IOException {
         List<Service> services = readServices();
-        services.add(service);
+        // Get next ID from persistent counter
+        int nextId = getNextId();
+        String newId = String.format("SE%02d", nextId);
+        // Create a new Service object with the generated ID
+        Service newService = new Service(
+            newId,
+            service.getName(),
+            service.getDuration(),
+            service.getPrice(),
+            service.getDescription(),
+            service.getType()
+        );
+        services.add(newService);
         saveAllServices(services);
+        // Increment and save the counter
+        saveNextId(nextId + 1);
     }
 
     public List<Service> getAllServices() throws IOException {
-        return readServices();
+        List<Service> services = readServices();
+        // Sort services by ID
+        services.sort(Comparator.comparing(Service::getId));
+        return services;
     }
 
     public Service getServiceById(String id) throws IOException {
@@ -79,6 +100,29 @@ public class ServiceHandler {
                 bw.write(service.getId() + "," + service.getName() + "," + service.getDuration() + "," + service.getPrice() + "," + description + "," + service.getType());
                 bw.newLine();
             }
+        }
+    }
+
+    private int getNextId() throws IOException {
+        File counterFile = new File(counterFilePath);
+        if (!counterFile.exists()) {
+            counterFile.createNewFile();
+            try (BufferedWriter bw = new BufferedWriter(new FileWriter(counterFile))) {
+                bw.write("1");
+            }
+            return 1;
+        }
+        try (BufferedReader br = new BufferedReader(new FileReader(counterFile))) {
+            String line = br.readLine();
+            return line != null && !line.isEmpty() ? Integer.parseInt(line) : 1;
+        } catch (NumberFormatException e) {
+            return 1;
+        }
+    }
+
+    private void saveNextId(int nextId) throws IOException {
+        try (BufferedWriter bw = new BufferedWriter(new FileWriter(counterFilePath))) {
+            bw.write(String.valueOf(nextId));
         }
     }
 }
